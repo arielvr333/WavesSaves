@@ -1,0 +1,98 @@
+package com.example.wavessavestest;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+
+public class MainActivity extends AppCompatActivity {
+
+    private TextView mTextViewReplyFromServer;
+    private EditText mEditTextSendMessage;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        Log.d("tag", "onClick");
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        Button buttonSend = (Button) findViewById(R.id.btn_send);
+        mEditTextSendMessage = (EditText) findViewById(R.id.edt_send_message);
+        mTextViewReplyFromServer = (TextView) findViewById(R.id.tv_reply_from_server);
+        buttonSend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d("tag", "onClick");
+                switch (view.getId()) {
+                    case R.id.btn_send:
+                        sendMessage(mEditTextSendMessage.getText().toString());
+                        break;
+                }
+            }
+        });
+        Log.d("tag", "Some logging");
+    }
+    private void sendMessage(final String message) {
+        Log.d("tag", "in sendmessage func");
+
+        final Handler handler = new Handler();
+        Thread thread = new Thread(new Runnable() {
+
+            String stringData;
+
+            @Override
+            public void run() {
+                Log.d("tag", "in thread - run");
+                DatagramSocket ds = null;
+                try {
+                    ds = new DatagramSocket();
+                    Log.d("tag", "datasocket created");
+                    // IP Address below is the IP address of that Device where server socket is opened.
+                    InetAddress serverAddr = InetAddress.getByName("192.168.1.14");
+                    DatagramPacket dp;
+                    dp = new DatagramPacket(message.getBytes(), message.length(), serverAddr, 20001);
+                    Log.d("tag", "data pocket created");
+                    ds.send(dp);
+                    Log.d("tag", "pocket esnt");
+
+                    byte[] lMsg = new byte[1000];
+                    dp = new DatagramPacket(lMsg, lMsg.length);
+                    ds.receive(dp);
+                    Log.d("tag", "pocket receive from a server");
+                    stringData = new String(lMsg, 0, dp.getLength());
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    if (ds != null) {
+                        ds.close();
+                    }
+                }
+
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        String s = mTextViewReplyFromServer.getText().toString();
+                        Log.d("tag", "run in handler (reply from server)");
+                        if (stringData.trim().length() != 0)
+                            mTextViewReplyFromServer.setText(s + "\nFrom Server : " + stringData);
+
+                    }
+                });
+            }
+        });
+
+        thread.start();
+    }
+
+
+}
