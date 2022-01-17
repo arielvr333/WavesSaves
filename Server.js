@@ -9,9 +9,18 @@ server.on('error',function(error){
 
 server.on('message',function(msg,info){
     console.log('Data received from client : ' + msg.toString());
-    server.send("Got Your message",info.port,'localhost');
-    if(info.address === "192.168.1.18")
-        server.send("Alert",info.port,'192.168.1.14');
+    if(info.address === '192.168.1.26')
+    {
+    server.send("Got Your message",info.port,info.address);
+    var cee = info.address;
+    console.log('in if 1  ' +info.address);
+    }
+    
+    if(info.address === '192.168.1.29')
+    {
+        server.send("Alert",info.port,cee);
+        console.log('in if 2  ' +info.address);
+    }
 });
 
 server.on('listening',function(){
@@ -31,4 +40,4 @@ server.bind(20001, "192.168.1.18");
 
 setTimeout(function(){
     server.close();
-},15000);
+},20000);
