@@ -2,24 +2,24 @@
 ###
 
 
-GET http://localhost:4000/
+GET http://localhost:28017/
 
 
 
 ###
 
 
-GET http://localhost:4000/post
+GET http://localhost:28017/post
 Authorization: barer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyMGQ0YmFhZGNmZjM0ODMyZmZmMzBhNiIsImlhdCI6MTY0NTA0MDUxNSwiZXhwIjoxNjQ1MDQwNTQ1fQ.MxJ76Q6D3tiFP7i6pe1zEogk_cnvsRYcxXBHwsmA_rQ
 ###
 
 
-GET http://localhost:4000/post/620d3347abfb42d96325fcc5
+GET http://localhost:28017/post/620d3347abfb42d96325fcc5
 
 ###
 
 
-POST http://localhost:4000/post
+POST http://localhost:28017/post
 Authorization: barer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyMGQ0YmFhZGNmZjM0ODMyZmZmMzBhNiIsImlhdCI6MTY0NTA0MDcxMiwiZXhwIjoxNjQ1MDQwNzQyfQ.J5n0F-8aTZrlqtjcRfcD4SXTzDWA1iaIsIxwplB5964
 Content-Type: application/json
 
@@ -31,7 +31,7 @@ Content-Type: application/json
 ###
 
 
-POST http://localhost:4000/auth/register
+POST http://localhost:28017/auth/register
 Content-Type: application/json
 
 {
@@ -42,7 +42,7 @@ Content-Type: application/json
 ###
 
 
-POST http://localhost:4000/auth/login
+POST http://localhost:28017/auth/login
 Content-Type: application/json
 
 {
@@ -53,7 +53,7 @@ Content-Type: application/json
 ###
 
 
-POST http://localhost:4000/auth/logout
+POST http://localhost:28017/auth/logout
 Content-Type: application/json
 
 {
