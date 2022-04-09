@@ -13,24 +13,25 @@ const sendError = (res,code,msg)=>{
 const register = async (req, res) => {
     const email = req.body.email
     const password = req.body.password
-
+console.log(email +password)
     try{
-        const exists = await User.findOne({'email' : email})
-        if (exists != null){
-            return res.status(400).send({
-                'status': 'fail',
-                'error': 'user exists'
-            })
-        }
-        const salt = await bcrypt.genSalt(10)
-        const hashPwd = await bcrypt.hash(password,salt)
-
-        const user = User({
-            'email' : email,
-            'password': hashPwd
-        })
-        newUser = await user.save();
-        res.status(200).send(newUser)
+         const doc = await User.findOne({'email' : email} );
+            if (doc!=null) {
+                console.log("wrong username");
+                return res.status(400).send({
+                    'status': 'fail',
+                    'error': 'user exists'
+                })
+            } else {
+                const salt = await bcrypt.genSalt(10)
+                const hashPwd = await bcrypt.hash(password, salt)
+                const user = User({
+                    'email': email,
+                    'password': hashPwd
+                })
+                newUser = await user.save();
+                res.status(200).send(newUser)
+            }
 
     }catch(err){
         res.status(400).send({
