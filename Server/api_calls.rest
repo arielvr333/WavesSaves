@@ -35,8 +35,9 @@ POST http://localhost:28017/auth/register
 Content-Type: application/json
 
 {
-    "email" : "d@d.com",
-    "password" : "12345"
+    "email" : "ariel@gmail.com",
+    "password" : "123456",
+    "firebaseToken": "batomeromerrr"
 }
 
 ###
@@ -46,8 +47,9 @@ POST http://localhost:28017/auth/login
 Content-Type: application/json
 
 {
-    "email" : "a@a.com",
-    "password" : "12345"
+    "email" : "ariel@gmail.com",
+    "password" : "123456",
+    "firebaseToken": "dayakshtra"
 }
 
 ###
