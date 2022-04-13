@@ -62,9 +62,12 @@ const sensorRouter = require('./routes/sensor_routes')
 app.use('/sensor',sensorRouter)
 
 const authRouter = require('./routes/auth_routes')
+const Module = require("module");
 app.use('/auth',authRouter)
 
 module.exports = app
+
+
 
 
 
@@ -81,6 +84,7 @@ server.on('message',function(msg,info) {
     let message = msg.toString();
     console.log('Data received from client : ' + message);
     const splitMessage = message.split(',');
+    console.log(splitMessage);
     const command = splitMessage[0];
     console.log('command: ' + command);
     switch (command) {
@@ -90,7 +94,7 @@ server.on('message',function(msg,info) {
             break;
         case 'alert'://alert
             alertHandler(info)
-            console.log('switch case sensor input data statement');
+            console.log('switch case alert data statement');
             break
         default:
             console.log('default statement');
@@ -113,7 +117,11 @@ server.on('listening',function(){
 
 server.bind(20001, "127.0.0.1");
 //server.bind(20001, "0.0.0.0");
-
+function SendMessage(message,port,address)
+{
+    console.log(message,port, address);
+    server.send(message,port, address);
+}
 
 function attachSensor(info,sensorIp)
 {
@@ -142,8 +150,8 @@ function attachSensor(info,sensorIp)
 
 function sensorinit(info){
     const sensor={
-        // _id: info.address,
-        _id: "127.0.0.3",
+         _id: info.address,
+        //_id: "127.0.0.3",
         _users: [],
         _threshold: 2,
         _standBy: false
@@ -151,8 +159,9 @@ function sensorinit(info){
     //MongoClient.connect(url, function (err, db) {
      //   assert.equal(null, err);
      //   const dbo = db.db("WavesSavesDataBase");
-        db.collection('sensors').findOne({_id: sensor.id},async function (err, doc) {
+        db.collection('sensors').findOne({_id: sensor._id},async function (err, doc) {
             if (!doc) {
+                console.log("eyal")
                 db.collection('sensors').insertOne(sensor, function (res) {
                     server.send("threshold " + sensor._threshold, info.port, info.address,sensor._standBy)
                 });
@@ -181,3 +190,6 @@ function createPayLoad(token){
     }
     return JSON.stringify(payload)
 }
+
+
+exports.SendMessage = SendMessage;

@@ -24,7 +24,9 @@ const updateThreshold =  (req, res) => {
     const threshold = req.body.threshold;
     try {
         Sensor.updateOne({"_ip": _ip}, {$set: {_threshold: threshold}}, function (err, doc) {
-         //       Server.server.send("threshold " + threshold, Server.port, _ip);
+            console.log("threshold " + threshold, 20001, _ip);
+           // Server.server.send("threshold " + threshold, 20001, _ip);
+            Server.SendMessage("threshold, " + threshold, 20001, _ip)
             res.status(200).send("ok")
         });
     }catch (err) {
