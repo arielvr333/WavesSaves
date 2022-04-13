@@ -3,8 +3,7 @@ const express = require('express')
 const app = express()
 const bodyParser = require('body-parser')
 const mongoose = require('mongoose')
-
-
+const request = require('request');
 const udp = require('dgram');
 const server = udp.createSocket('udp4');
 const assert = require("assert");
@@ -66,6 +65,9 @@ const authRouter = require('./routes/auth_routes')
 app.use('/auth',authRouter)
 
 module.exports = app
+
+
+
 
 
 ////////////////////////////////////////////////////////////// old server/////////////////////////////////////////////////////////////////////////
@@ -161,6 +163,24 @@ function sensorinit(info){
 
     });
 }
-function alertHandler() {
+function alertHandler(info) {
+    const token = "";
+    const payload = createPayLoad(token);
+    request.post({ headers: {'content-type' : 'application/json', "Authorization": process.env.FIREBASE_TOKEN}, url: "https://fcm.googleapis.com/fcm/send", body: payload});
+    server.send("sent to phone", info.port, info.address)
+}
 
+//         to: "esF2EDkpSb6jMnXMrr8tRq:APA91bHtvG1D8tFAwpzLQ72mt0aDiNKWmw9eL2ITLCSMuE4trTs4oJoHIOqMEbANhrcYoLehi1J2bq58stHAxNl0Q3ayAortZMfEHFYdPSJ_YYqsF5tbN37aOQlfF4nq0qYqYgXj0TW1",
+function createPayLoad(token){
+    let payload = {
+        to: "eav_ZqBVR7ufIgLOYp7cuz:APA91bGxVy5lBAHWOriFs2S894MeDYsxGEYpuagQwyas-Kr75V41eX1Na4tJMVEJIQyR6CJzqjbwEu1jZVL-dh08nAO35NpsxzOpYw0H0DEEhADon9BefZlAnb5GXVhcV8fG8-NY6JCO",
+        data: {
+            sound: "alarm.mp3",
+            title: "ALERT",
+            body: "ALERT",
+            content_available: true,
+            priority: "high"
+        }
+    }
+    return JSON.stringify(payload)
 }

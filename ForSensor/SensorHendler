@@ -14,6 +14,13 @@ ACCEL_ZOUT_H = 0x3F
 GYRO_XOUT_H = 0x43
 GYRO_YOUT_H = 0x45
 GYRO_ZOUT_H = 0x47
+bus = smbus.SMBus(1)
+Device_Address = 0x68
+serverAddressPort = ("127.0.0.1", 20001)
+UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+bufferSize = 1024
+UDPClientSocket.connect(serverAddressPort)
+UDPClientSocket.settimeout(5)            # need to check, might do problems
 
 
 def MPU_Init():
@@ -33,16 +40,8 @@ def read_raw_data(addr):
     return value
 
 
-bus = smbus.SMBus(1)
-Device_Address = 0x68
-serverAddressPort = ("127.0.0.1", 20001)
-UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
-bufferSize = 1024
-UDPClientSocket.connect(serverAddressPort)
-
-def thread_readdata(queue):
+def analyzeData(queue):
     global th
-    print("Thread starting")
     while True:
         if not (queue.empty()):
             th = float(queue.get())
@@ -60,27 +59,44 @@ def thread_readdata(queue):
         Gy = gyro_y / 131.0
         Gz = gyro_z / 131.0
         sleep(1)
-        print(th)
 
         if Ax > th or Ay > th or Az > th or Gx > th or Gy > th or Gz > th:
-            alert = "alert"
-            bytesToSend = str.encode(alert)
+            bytesToSend = str.encode("alert")
             UDPClientSocket.sendto(bytesToSend, serverAddressPort)
-            print(alert)
+
+
+def buildConnection():          # TODO: complete this function to reestablish communication with the server
+    bytesToSend = str.encode("sensor")
+    UDPClientSocket.sendto(bytesToSend, serverAddressPort)
+
+
+def receiveMessages():
+    bytesAddressPair = UDPClientSocket.recvfrom(1024)
+    message = bytesAddressPair[0]
+    msg = message.decode()
+    print(msg)
+    splitMessage = msg.split(" ")
+    command = splitMessage[0]
+    if command == "threshold":
+        th = splitMessage[1]
+        queue.put(th)
+    elif command == "standby":
+        ReadingData.terminate()
+    elif command == "start":
+        ReadingData.start()
+    else:
+        buildConnection()
 
 
 if __name__ == '__main__':
 
     MPU_Init()
-    event = multiprocessing.Event()
     th = 3
-    init = "sensor"
-    bytesToSend = str.encode(init)
+    bytesToSend = str.encode("sensor")
     UDPClientSocket.sendto(bytesToSend, serverAddressPort)
-    print(init + "sent")
     queue = multiprocessing.Queue()
     queue.put(th)
-    ReadingData = multiprocessing.Process(target=thread_readdata, args=(queue,))
+    ReadingData = multiprocessing.Process(target=analyzeData, args=(queue,))
     ReadingData.start()
     while True:
         bytesAddressPair = UDPClientSocket.recvfrom(1024)
@@ -92,7 +108,6 @@ if __name__ == '__main__':
         print(msg, clientAddress)
         splitMessage = msg.split(" ")
         command = splitMessage[0]
-        print(command)
         if command == "threshold":
             th = splitMessage[1]
             queue.put(th)
@@ -101,4 +116,4 @@ if __name__ == '__main__':
         elif command == "start":
             ReadingData.start()
         else:
-            print("bad command")
+            buildConnection()
