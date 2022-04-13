@@ -12,6 +12,10 @@ const userSchema = new mongoose.Schema({
     firebaseToken: {
         type: String,
         required: true
+    },
+    sensorList: {
+        type: Array,
+        required: false
     }
 })
 

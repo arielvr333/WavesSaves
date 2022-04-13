@@ -30,8 +30,8 @@ console.log(email +password)
                 const user = User({
                     'email': email,
                     'password': hashPwd,
-                    'firebaseToken': token
-
+                    'firebaseToken': token,
+                    'sensorList': []
                 })
                 newUser = await user.save();
                 res.status(200).send(newUser)

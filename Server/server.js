@@ -142,26 +142,24 @@ function attachSensor(info,sensorIp)
 
 function sensorinit(info){
     const sensor={
-        _id: info.address,
+        // _id: info.address,
+        _id: "127.0.0.3",
         _users: [],
-        _threshold: 3,
+        _threshold: 2,
+        _standBy: false
     }
-    MongoClient.connect(url, function (err, db) {
-        assert.equal(null, err);
-        const dbo = db.db("WavesSavesDataBase");
-        dbo.collection('sensors').findOne({_id: info.address},async function (err, doc) {
+    //MongoClient.connect(url, function (err, db) {
+     //   assert.equal(null, err);
+     //   const dbo = db.db("WavesSavesDataBase");
+        db.collection('sensors').findOne({_id: sensor.id},async function (err, doc) {
             if (!doc) {
-                dbo.collection('sensors').insertOne(sensor, function (res) {
-                    server.send("threshold " + sensor._threshold, info.port, info.address)
+                db.collection('sensors').insertOne(sensor, function (res) {
+                    server.send("threshold " + sensor._threshold, info.port, info.address,sensor._standBy)
                 });
             } else
-                server.send("threshold " + doc._threshold, info.port, info.address);
-            const delay = ms => new Promise(resolve => setTimeout(resolve, ms))
-            await delay(3000)
-            server.send("threshold " + 1, info.port, info.address);
+                server.send("threshold " + doc._threshold, info.port, info.address,doc._standBy);
         });
-
-    });
+   // });
 }
 function alertHandler(info) {
     const token = "";
@@ -170,10 +168,9 @@ function alertHandler(info) {
     server.send("sent to phone", info.port, info.address)
 }
 
-//         to: "esF2EDkpSb6jMnXMrr8tRq:APA91bHtvG1D8tFAwpzLQ72mt0aDiNKWmw9eL2ITLCSMuE4trTs4oJoHIOqMEbANhrcYoLehi1J2bq58stHAxNl0Q3ayAortZMfEHFYdPSJ_YYqsF5tbN37aOQlfF4nq0qYqYgXj0TW1",
 function createPayLoad(token){
     let payload = {
-        to: "eav_ZqBVR7ufIgLOYp7cuz:APA91bGxVy5lBAHWOriFs2S894MeDYsxGEYpuagQwyas-Kr75V41eX1Na4tJMVEJIQyR6CJzqjbwEu1jZVL-dh08nAO35NpsxzOpYw0H0DEEhADon9BefZlAnb5GXVhcV8fG8-NY6JCO",
+        to: "esF2EDkpSb6jMnXMrr8tRq:APA91bHtvG1D8tFAwpzLQ72mt0aDiNKWmw9eL2ITLCSMuE4trTs4oJoHIOqMEbANhrcYoLehi1J2bq58stHAxNl0Q3ayAortZMfEHFYdPSJ_YYqsF5tbN37aOQlfF4nq0qYqYgXj0TW1",
         data: {
             sound: "alarm.mp3",
             title: "ALERT",

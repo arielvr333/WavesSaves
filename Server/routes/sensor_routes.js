@@ -49,7 +49,7 @@ const authenticate = require('../common/auth_middleware')
 *               items:
 *                 $ref: '#/components/schemas/Post'
 */
-router.get('/', authenticate, Sensor.getSensors)
+router.post('/getall', Sensor.getSensors)
 
 /**
 * @swagger
@@ -95,5 +95,7 @@ router.get('/:id', authenticate, Sensor.getSensorById)
 *               $ref: '#/components/schemas/Post'
 */
 router.post('/', authenticate, Sensor.addNewSensor)
+
+router.post('/threshold', Sensor.updateThreshold)
 
 module.exports = router
