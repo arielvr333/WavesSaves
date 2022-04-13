@@ -1,9 +1,9 @@
-const Post = require('../models/post_model')
+const Sensor = require('../models/sensor_model')
 
-const getPosts = async (req, res) => {
+const getSensors = async (req, res) => {
     try {
-        posts = await Post.find()
-        res.status(200).send(posts)
+        sensors = await Sensor.find()
+        res.status(200).send(sensors)
     } catch (err) {
         res.status(400).send({
             'status': 'fail',
@@ -12,10 +12,10 @@ const getPosts = async (req, res) => {
     }
 }
 
-const getPostById = async (req, res) => {
+const getSensorById = async (req, res) => {
     try {
-        posts = await Post.findById(req.params.id)
-        res.status(200).send(posts)
+        sensors = await Sensor.findById(req.params.id)
+        res.status(200).send(sensors)
     } catch (err) {
         res.status(400).send({
             'status': 'fail',
@@ -24,29 +24,29 @@ const getPostById = async (req, res) => {
     }
 }
 
-const addNewPost = (req, res) => {
-    console.log('addNewPost ' + req.body.message)
+const addNewSensor = (req, res) => {
+    console.log('addNewSensor ' + req.body.message)
     sender = req.user.id
 
-    const post = Post({
+    const sensor = Sensor({
         message: req.body.message,
         sender: sender
     })
 
-    post.save((error, newPost) => {
+    sensor.save((error, newSensor) => {
         if (error) {
             res.status(400).send({
                 'status': 'fail',
                 'error': error.message
             })
         } else {
-            res.status(200).send(newPost)
+            res.status(200).send(newSensor)
         }
     })
 }
 
 module.exports = {
-    getPosts,
-    getPostById,
-    addNewPost
+    getSensors,
+    getSensorById,
+    addNewSensor
 }

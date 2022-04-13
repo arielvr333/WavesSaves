@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 
-const Post = require('../controllers/posts')
+const Sensor = require('../controllers/sensors')
 const authenticate = require('../common/auth_middleware')
 
 /**
@@ -49,7 +49,7 @@ const authenticate = require('../common/auth_middleware')
 *               items:
 *                 $ref: '#/components/schemas/Post'
 */
-router.get('/', authenticate, Post.getPosts)
+router.get('/', authenticate, Sensor.getSensors)
 
 /**
 * @swagger
@@ -72,7 +72,7 @@ router.get('/', authenticate, Post.getPosts)
 *             schema:
 *               $ref: '#/components/schemas/Post'
 */
-router.get('/:id', authenticate, Post.getPostById)
+router.get('/:id', authenticate, Sensor.getSensorById)
 
 /**
 * @swagger
@@ -94,6 +94,6 @@ router.get('/:id', authenticate, Post.getPostById)
 *             schema:
 *               $ref: '#/components/schemas/Post'
 */
-router.post('/', authenticate, Post.addNewPost)
+router.post('/', authenticate, Sensor.addNewSensor)
 
 module.exports = router

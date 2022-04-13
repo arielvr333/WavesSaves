@@ -1,6 +1,6 @@
 const mongoose = require("mongoose")
 
-const postSchema = new mongoose.Schema({
+const sensorSchema = new mongoose.Schema({
     message: {
         type: String,
         required: true
@@ -11,4 +11,4 @@ const postSchema = new mongoose.Schema({
     }
 })
 
-module.exports = mongoose.model('sensors', postSchema)
+module.exports = mongoose.model('sensors', sensorSchema)

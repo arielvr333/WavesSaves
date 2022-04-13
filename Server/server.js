@@ -59,16 +59,13 @@ const port = process.env.PORT
 const indexRouter = require('./routes/index')
 app.use('/',indexRouter)
 
-const postRouter = require('./routes/post_routes')
-app.use('/post',postRouter)
+const sensorRouter = require('./routes/sensor_routes')
+app.use('/sensor',sensorRouter)
 
 const authRouter = require('./routes/auth_routes')
 app.use('/auth',authRouter)
 
 module.exports = app
-
-
-
 
 
 ////////////////////////////////////////////////////////////// old server/////////////////////////////////////////////////////////////////////////
