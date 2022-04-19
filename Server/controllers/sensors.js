@@ -24,8 +24,6 @@ const updateThreshold =  (req, res) => {
     const threshold = req.body.threshold;
     try {
         Sensor.updateOne({"_ip": _ip}, {$set: {_threshold: threshold}}, function (err, doc) {
-            console.log("threshold " + threshold, 20001, _ip);
-           // Server.server.send("threshold " + threshold, 20001, _ip);
             Server.SendMessage("threshold, " + threshold, 20001, _ip)
             res.status(200).send("ok")
         });
@@ -52,8 +50,6 @@ const getSensorById = async (req, res) => {
 const addNewSensor = (req, res) => {
     console.log('addNewSensor ' + req.body.message)
     sender = req.user.id
-
-
     //todo: change  data
     const sensor = Sensor({
         message: req.body.message,
