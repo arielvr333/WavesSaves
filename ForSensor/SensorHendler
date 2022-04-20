@@ -16,11 +16,11 @@ GYRO_YOUT_H = 0x45
 GYRO_ZOUT_H = 0x47
 bus = smbus.SMBus(1)
 Device_Address = 0x68
-serverAddressPort = ("127.0.0.1", 20001)
+serverAddressPort = ("192.168.1.18", 20001)
 UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 bufferSize = 1024
 UDPClientSocket.connect(serverAddressPort)
-UDPClientSocket.settimeout(5)            # need to check, might do problems
+#UDPClientSocket.settimeout(5)            # need to check, might do problems
 
 
 def MPU_Init():
@@ -116,4 +116,4 @@ if __name__ == '__main__':
         elif command == "start":
             ReadingData.start()
         else:
-            buildConnection()
+            print("ha")
