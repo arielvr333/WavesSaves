@@ -6,21 +6,6 @@ const mongoose = require('mongoose')
 const request = require('request');
 const udp = require('dgram');
 const server = udp.createSocket('udp4');
-const assert = require("assert");
-
-// MongoClient.connect(url, function (err, db) {
-//     if (err) throw err;
-//     var dbo = db.db("WavesSavesDataBase");
-//     dbo.dropDatabase(function (err, result) {
-//         if (err) throw err;
-//     });
-//     dbo.createCollection("users", function (err, res) {
-//         if (err) throw err;
-//     });
-//     dbo.createCollection("sensors", function (err, res) {
-//         if (err) throw err;
-//     });
-// });
 
 if (process.env.NODE_ENV === "development") {
     const swaggerUI = require("swagger-ui-express")
@@ -102,31 +87,6 @@ server.bind(20001, "127.0.0.1");
 
 function SendMessage(message,port,address){
     server.send(message,port, address);
-}
-
-function attachSensor(info,sensorIp)            //TODO:redo this function
-{
-    MongoClient.connect(url, function (err, db) {
-        const dbo = db.db("WavesSavesDataBase");
-        dbo.collection('users').findOne({_id: info.address},function (err, doc) {
-            doc._sensorList.push(sensorIp)
-            dbo.collection('users').updateOne({"_ip": info.address,}, {$set: {_sensorList: doc._sensorList}}, function (err) {
-                assert.equal(null, err);
-            });
-        });
-
-        dbo.collection('sensors').findOne({_id: sensorIp},function (err, doc) {
-            if (!doc) {
-                server.send("no sensor activated", info.port, info.address);
-            }
-            else
-                doc._users.push(info.address);
-            dbo.collection('users').updateOne({"_ip": info.address,}, {$set: {_sensorList: doc._sensorList}}, function (err) {
-                assert.equal(null, err);
-            });
-            server.send("ok", info.port, info.address);
-        });
-    });
 }
 
 function sensorInit(info){

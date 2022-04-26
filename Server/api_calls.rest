@@ -10,11 +10,17 @@ GET http://localhost:28017/
 
 
 GET http://localhost:28017/sensor
-Authorization: barer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyMGQ0YmFhZGNmZjM0ODMyZmZmMzBhNiIsImlhdCI6MTY0NTA0MDUxNSwiZXhwIjoxNjQ1MDQwNTQ1fQ.MxJ76Q6D3tiFP7i6pe1zEogk_cnvsRYcxXBHwsmA_rQ
+//Authorization: barer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyMGQ0YmFhZGNmZjM0ODMyZmZmMzBhNiIsImlhdCI6MTY0NTA0MDUxNSwiZXhwIjoxNjQ1MDQwNTQ1fQ.MxJ76Q6D3tiFP7i6pe1zEogk_cnvsRYcxXBHwsmA_rQ
 ###
 
 
-GET http://localhost:28017/sensor/620d3347abfb42d96325fcc5
+POST http://localhost:28017/sensor/add
+Content-Type: application/json
+
+{
+  "email" : "tomer@gmail.com",
+  "sensor" : "127.0.0.4"
+}
 
 ###
 
@@ -24,7 +30,7 @@ POST http://localhost:28017/sensor/getall
 Content-Type: application/json
 
 {
-    "email" : "ariel@gmail.com"
+    "email" : "tomer@gmail.com"
 
 }
 
@@ -39,13 +45,22 @@ Content-Type: application/json
 }
 
 ###
+POST http://localhost:28017/sensor/standby
+Content-Type: application/json
+
+{
+  "ip" : "127.0.0.1",
+  "standBy": true
+}
+
+###
 
 POST https://fcm.googleapis.com/fcm/send
 Authorization: key=AAAA4jYnNFw:APA91bGk0Q94BUVgJ7ABRJ3-9rvVpBpHICcSMwGrPCRcujeKR0LhHkzDZRtTEmEZMry-4qaAb9n0IZlcAcKHXDdL8OlZPWlOnuaySPiEuldt9FV1PADJP2IHT8do70k74Uqh5bMQWDW4
 Content-Type: application/json
 
 {
-  "to": "eav_ZqBVR7ufIgLOYp7cuz:APA91bGxVy5lBAHWOriFs2S894MeDYsxGEYpuagQwyas-Kr75V41eX1Na4tJMVEJIQyR6CJzqjbwEu1jZVL-dh08nAO35NpsxzOpYw0H0DEEhADon9BefZlAnb5GXVhcV8fG8-NY6JCO",
+  "to": "esF2EDkpSb6jMnXMrr8tRq:APA91bHtvG1D8tFAwpzLQ72mt0aDiNKWmw9eL2ITLCSMuE4trTs4oJoHIOqMEbANhrcYoLehi1J2bq58stHAxNl0Q3ayAortZMfEHFYdPSJ_YYqsF5tbN37aOQlfF4nq0qYqYgXj0TW1",
   "data": {
     "sound": "default",
     "title": "ALERT",
@@ -55,14 +70,24 @@ Content-Type: application/json
   }
 }
 
-###
-POST http://localhost:28017/auth/register
+###                                        # REMOTE SERVER
+POST http://193.106.55.120:28017/auth/register
 Content-Type: application/json
 
 {
     "email" : "tomer@gmail.com",
     "password" : "123456",
-    "firebaseToken": "batomeromerrr"
+    "firebaseToken": "esF2EDkpSb6jMnXMrr8tRq:APA91bHtvG1D8tFAwpzLQ72mt0aDiNKWmw9eL2ITLCSMuE4trTs4oJoHIOqMEbANhrcYoLehi1J2bq58stHAxNl0Q3ayAortZMfEHFYdPSJ_YYqsF5tbN37aOQlfF4nq0qYqYgXj0TW1"
+}
+
+###                                   # LOCAL SERVER
+POST http://127.0.0.1:28017/auth/register
+Content-Type: application/json
+
+{
+  "email" : "tomer@gmail.com",
+  "password" : "123456",
+  "firebaseToken": "esF2EDkpSb6jMnXMrr8tRq:APA91bHtvG1D8tFAwpzLQ72mt0aDiNKWmw9eL2ITLCSMuE4trTs4oJoHIOqMEbANhrcYoLehi1J2bq58stHAxNl0Q3ayAortZMfEHFYdPSJ_YYqsF5tbN37aOQlfF4nq0qYqYgXj0TW1"
 }
 
 ###
@@ -72,18 +97,7 @@ POST http://localhost:28017/auth/login
 Content-Type: application/json
 
 {
-    "email" : "ariel@gmail.com",
+    "email" : "tomer@gmail.com",
     "password" : "123456",
-    "firebaseToken": "dayakshtra"
-}
-
-###
-
-
-POST http://localhost:28017/auth/logout
-Content-Type: application/json
-
-{
-    "message" : "this is my new post",
-    "sender" : "Eliav"
+    "firebaseToken": "esF2EDkpSb6jMnXMrr8tRq:APA91bHtvG1D8tFAwpzLQ72mt0aDiNKWmw9eL2ITLCSMuE4trTs4oJoHIOqMEbANhrcYoLehi1J2bq58stHAxNl0Q3ayAortZMfEHFYdPSJ_YYqsF5tbN37aOQlfF4nq0qYqYgXj0TW1"
 }

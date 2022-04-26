@@ -35,6 +35,25 @@ const updateThreshold =  (req, res) => {
     }
 }
 
+const setStandByMode =  (req, res) => {
+    const sensorIp = req.body.ip;
+    const StandBy = req.body.standBy;
+    try {
+        Sensor.updateOne({"_ip": sensorIp}, {$set: {_standBy: StandBy}}, function () {
+            if (StandBy)
+                Server.SendMessage("standBy", 20001, sensorIp)
+            else
+                Server.SendMessage("start", 20001, sensorIp)
+            res.status(200).send("ok")
+        });
+    }catch (err) {
+        res.status(400).send({
+            'status': 'fail',
+            'error': err.message
+        })
+    }
+}
+
 const getSensorById = async (req, res) => {
     try {
         sensors = await Sensor.findById(req.params.id)
@@ -47,30 +66,48 @@ const getSensorById = async (req, res) => {
     }
 }
 
-const addNewSensor = (req, res) => {
-    console.log('addNewSensor ' + req.body.message)
-    sender = req.user.id
-    //todo: change  data
-    const sensor = Sensor({
-        message: req.body.message,
-        sender: sender
-    })
+const attachSensor = async (req, res) => {
+    try {
+        let userName = req.body.email
+        let sensorIp = req.body.sensor
+        User.findOne({email: userName}, async function (err, doc) {
+            if(!doc.sensorList.includes(sensorIp)) {
+                doc.sensorList.push(sensorIp);
+                await doc.save();
+            }
+        });
 
-    sensor.save((error, newSensor) => {
-        if (error) {
-            res.status(400).send({
-                'status': 'fail',
-                'error': error.message
-            })
-        } else {
-            res.status(200).send(newSensor)
-        }
-    })
+        Sensor.findOne({_id: sensorIp}, async function (err, doc) {
+            if (!doc) {
+                let newSensor = {
+                    _id: sensorIp,
+                    _users: [userName],
+                    _threshold: 2,
+                    _standBy: false
+                }
+                Sensor.create(newSensor, function () {
+                    res.status(200).send("ok");
+                });
+            } else {
+                if(!doc._users.includes(userName)) {
+                    doc._users.push(userName);
+                    await doc.save();
+                }
+                res.status(200).send("ok");
+            }
+        })
+    } catch (err) {
+        res.status(400).send({
+            'status': 'fail',
+            'error': err.message
+        })
+    }
 }
 
 module.exports = {
     getSensors,
     getSensorById,
-    addNewSensor,
-    updateThreshold
+    attachSensor,
+    updateThreshold,
+    setStandByMode
 }
