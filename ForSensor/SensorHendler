@@ -20,8 +20,7 @@ serverAddressPort = ("127.0.0.1", 20001)
 UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 bufferSize = 1024
 UDPClientSocket.connect(serverAddressPort)
-#UDPClientSocket.settimeout(5)            # need to check, might do problems
-
+UDPClientSocket.settimeout(5)
 
 def MPU_Init():
     bus.write_byte_data(Device_Address, SMPLRT_DIV, 7)
@@ -40,80 +39,85 @@ def read_raw_data(addr):
     return value
 
 
-def analyzeData(queue):
-    global th
+def analyzeData(Queue):
+    th = 4
+    StandBY = False
     while True:
-        if not (queue.empty()):
-            th = float(queue.get())
-        acc_x = read_raw_data(ACCEL_XOUT_H)
-        acc_y = read_raw_data(ACCEL_YOUT_H)
-        acc_z = read_raw_data(ACCEL_ZOUT_H)
-        gyro_x = read_raw_data(GYRO_XOUT_H)
-        gyro_y = read_raw_data(GYRO_YOUT_H)
-        gyro_z = read_raw_data(GYRO_ZOUT_H)
-        Ax = acc_x / 16384.0
-        Ay = acc_y / 16384.0
-        Az = acc_z / 16384.0
+        if not (Queue.empty()):
+            obj = Queue.get()
+            if type(obj) == bool:
+                StandBY = obj
+            elif type(obj) == int:
+                th = int(obj)
+        if not StandBY:
+            acc_x = read_raw_data(ACCEL_XOUT_H)
+            acc_y = read_raw_data(ACCEL_YOUT_H)
+            acc_z = read_raw_data(ACCEL_ZOUT_H)
+            gyro_x = read_raw_data(GYRO_XOUT_H)
+            gyro_y = read_raw_data(GYRO_YOUT_H)
+            gyro_z = read_raw_data(GYRO_ZOUT_H)
+            Ax = acc_x / 16384.0
+            Ay = acc_y / 16384.0
+            Az = acc_z / 16384.0
 
-        Gx = gyro_x / 131.0
-        Gy = gyro_y / 131.0
-        Gz = gyro_z / 131.0
-        sleep(1)
+            Gx = gyro_x / 131.0
+            Gy = gyro_y / 131.0
+            Gz = gyro_z / 131.0
+            sleep(1)
+            if Ax > th or Ay > th or Az > th or Gx > th or Gy > th or Gz > th:
+                alert = str.encode("alert")
+                UDPClientSocket.sendto(alert, serverAddressPort)
+                try:
+                    answer = UDPClientSocket.recvfrom(1024)
+                    Message = answer[0].decode().split(" ")
+                    if Message[0] == "sent":
+                        sleep(20)  # sleep to avoid overloading alerts until waves calm
+                except ConnectionError:     # lost connection
+                    print("connection lost")
+                    continue
+                except Exception as exp:  # other exceptions
+                    print(exp)
+                    continue
+        else:
+            sleep(1)
 
-        if Ax > th or Ay > th or Az > th or Gx > th or Gy > th or Gz > th:
-            bytesToSend = str.encode("alert")
-            UDPClientSocket.sendto(bytesToSend, serverAddressPort)
 
-
-def buildConnection():          # TODO: complete this function to reestablish communication with the server
-    bytesToSend = str.encode("sensor")
-    UDPClientSocket.sendto(bytesToSend, serverAddressPort)
-
-
-def receiveMessages():
-    bytesAddressPair = UDPClientSocket.recvfrom(1024)
-    message = bytesAddressPair[0]
-    msg = message.decode()
-    print(msg)
-    splitMessage = msg.split(" ")
-    command = splitMessage[0]
-    if command == "threshold":
-        th = splitMessage[1]
-        queue.put(th)
-    elif command == "standby":
-        ReadingData.terminate()
-    elif command == "start":
-        ReadingData.start()
-    else:
-        buildConnection()
+def getStatus():
+    msg = str.encode("status")
+    threshold = 4
+    standBy = "false"
+    while True:
+        try:
+            UDPClientSocket.sendto(msg, serverAddressPort)
+            bytesAddressPair = UDPClientSocket.recvfrom(1024)
+            splitMessage = bytesAddressPair[0].decode().split(" ")
+            if threshold != int(splitMessage[0]) or standBy != splitMessage[1]:
+                while not queue.empty():    # empty the queue
+                    queue.get()
+                threshold = int(splitMessage[0])
+                standBy = splitMessage[1]
+                queue.put(threshold)
+                if standBy == "false":
+                    queue.put(False)
+                elif standBy == "true":
+                    queue.put(True)
+            sleep(1)
+        except socket.timeout:
+            pass
+        except Exception as exp:
+            print(exp)
+            pass
 
 
 if __name__ == '__main__':
-
     MPU_Init()
-    th = 3
-    bytesToSend = str.encode("sensor")
-    UDPClientSocket.sendto(bytesToSend, serverAddressPort)
     queue = multiprocessing.Queue()
-    queue.put(th)
-    ReadingData = multiprocessing.Process(target=analyzeData, args=(queue,))
-    ReadingData.start()
-    while True:
-        bytesAddressPair = UDPClientSocket.recvfrom(1024)
-        message = bytesAddressPair[0]
-        address = bytesAddressPair[1]
-        msg = message.decode()
-        clientMsg = "{}".format(message)
-        clientAddress = "{}".format(address)
-        print(msg, clientAddress)
-        splitMessage = msg.split(" ")
-        command = splitMessage[0]
-        if command == "threshold":
-            th = splitMessage[1]
-            queue.put(th)
-        elif command == "standby":
-            ReadingData.terminate()
-        elif command == "start":
-            ReadingData.start()
-        else:
-            print("ha")
+    try:
+        ReadingData = multiprocessing.Process(target=analyzeData, args=(queue,))
+        ReadingData.start()
+        getStatus()
+    except WindowsError as e:
+        print(str(e))
+        print("no connection")
+    except Exception as e:
+        print(str(e))
