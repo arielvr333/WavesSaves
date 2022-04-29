@@ -1,6 +1,5 @@
 const User = require('../models/user_model')
 const bcrypt = require('bcrypt')
-const { use } = require('../routes')
 const jwt = require('jsonwebtoken')
 
 const sendError = (res,code,msg)=>{
@@ -14,30 +13,29 @@ const register = async (req, res) => {
     const email = req.body.email
     const password = req.body.password
     const token = req.body.firebaseToken
-console.log(email +password)
-    try{
-         const doc = await User.findOne({'email' : email} );
-            if (doc!=null) {
-                console.log("wrong username");
-                return res.status(400).send({
-                    'status': 'fail',
-                    'error': 'user exists'
-                })
-            } else {
-                const salt = await bcrypt.genSalt(10)
-                const hashPwd = await bcrypt.hash(password, salt)
+    let newUser;
+    try {
+        const doc = await User.findOne({'email': email});
+        if (doc != null) {
+            return res.status(400).send({
+                'status': 'fail',
+                'error': 'user exists'
+            })
+        } else {
+            const salt = await bcrypt.genSalt(10)
+            const hashPwd = await bcrypt.hash(password, salt)
 
-                const user = User({
-                    'email': email,
-                    'password': hashPwd,
-                    'firebaseToken': token,
-                    'sensorList': []
-                })
-                newUser = await user.save();
-                res.status(200).send(newUser)
-            }
+            const user = User({
+                'email': email,
+                'password': hashPwd,
+                'firebaseToken': token,
+                'sensorList': []
+            })
+            newUser = await user.save();
+            res.status(200).send(newUser)
+        }
 
-    }catch(err){
+    } catch (err) {
         res.status(400).send({
             'status': 'fail',
             'error': err.message
@@ -64,7 +62,7 @@ const login = async (req, res) => {
             process.env.ACCESS_TOKEN_SECRET,
             {expiresIn: process.env.JWT_TOKEN_EXPIRATION}
             )
-        const doc = await User.updateOne({'email' : email},{$set:{  firebaseToken: token}} );
+        await User.updateOne({'email' : email},{$set:{  firebaseToken: token}});
         res.status(200).send({'accessToken' : accessToken})
 
     }catch(err){

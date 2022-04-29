@@ -14,19 +14,20 @@ GET http://localhost:28017/sensor
 ###
 
 
-POST http://localhost:28017/sensor/add
+POST http://localhost:80/sensor/add
 Content-Type: application/json
+//Authorization : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyNmI2ZTM2YjdjN2IyZDg3YzE0NTJiMiIsImlhdCI6MTY1MTI2MTQ1NCwiZXhwIjoxNjUxMjY1MDU0fQ.sui0GM3oefWW5yyMj8ANCwT0SMY67I3M56_CsJqPBAA
 
 {
   "email" : "tomer@gmail.com",
-  "sensor" : "127.0.0.4"
+  "sensor" : "127.0.0.1"
 }
 
 ###
 
 //Authorization: barer 021a7220b3deea31d0094bfec4e33ab6e6e8f09417e253fded8409960a37e4a68988765beded4d4892ac9c256bf4fa26b886cd2b83746404956205274724071c
 
-POST http://localhost:28017/sensor/getall
+POST http://localhost:80/sensor/getall
 Content-Type: application/json
 
 {
@@ -35,22 +36,22 @@ Content-Type: application/json
 }
 
 ###
-POST http://localhost:28017/sensor/threshold
+POST http://localhost:80/sensor/threshold
 Content-Type: application/json
 
 {
   "ip" : "127.0.0.1",
-  "threshold": 7
+  "threshold": 4
 
 }
 
 ###
-POST http://localhost:28017/sensor/standby
+POST http://localhost:80/sensor/standby
 Content-Type: application/json
 
 {
   "ip" : "127.0.0.1",
-  "standBy": true
+  "standBy": false
 }
 
 ###
@@ -71,7 +72,7 @@ Content-Type: application/json
 }
 
 ###                                        # REMOTE SERVER
-POST http://193.106.55.120:28017/auth/register
+POST http://193.106.55.120:80/auth/register
 Content-Type: application/json
 
 {
@@ -81,7 +82,7 @@ Content-Type: application/json
 }
 
 ###                                   # LOCAL SERVER
-POST http://127.0.0.1:28017/auth/register
+POST http://127.0.0.1:80/auth/register
 Content-Type: application/json
 
 {
@@ -93,7 +94,7 @@ Content-Type: application/json
 ###
 
 
-POST http://localhost:28017/auth/login
+POST http://localhost:80/auth/login
 Content-Type: application/json
 
 {

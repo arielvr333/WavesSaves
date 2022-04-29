@@ -1,6 +1,5 @@
 const Sensor = require('../models/sensor_model')
 const User = require('../models/user_model')
-const Server = require('../server')
 
 
 const getSensors = async (req, res) => {
@@ -23,8 +22,7 @@ const updateThreshold =  (req, res) => {
     const _ip = req.body.ip;
     const threshold = req.body.threshold;
     try {
-        Sensor.updateOne({"_ip": _ip}, {$set: {_threshold: threshold}}, function (err, doc) {
-            Server.SendMessage("threshold, " + threshold, 20001, _ip)
+        Sensor.updateOne({"_id": _ip}, {$set: {_threshold: threshold}}, function (err, doc) {
             res.status(200).send("ok")
         });
     }catch (err) {
@@ -39,11 +37,8 @@ const setStandByMode =  (req, res) => {
     const sensorIp = req.body.ip;
     const StandBy = req.body.standBy;
     try {
-        Sensor.updateOne({"_ip": sensorIp}, {$set: {_standBy: StandBy}}, function () {
-            if (StandBy)
-                Server.SendMessage("standBy", 20001, sensorIp)
-            else
-                Server.SendMessage("start", 20001, sensorIp)
+        Sensor.updateOne({"_id": sensorIp}, {$set: {_standBy: StandBy}}, function () {
+            console.log("threshold")
             res.status(200).send("ok")
         });
     }catch (err) {
