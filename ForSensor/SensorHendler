@@ -14,7 +14,7 @@ ACCEL_ZOUT_H = 0x3F
 GYRO_XOUT_H = 0x43
 GYRO_YOUT_H = 0x45
 GYRO_ZOUT_H = 0x47
-# bus = smbus.SMBus(1)
+bus = smbus.SMBus(1)
 Device_Address = 0x68
 serverAddressPort = ("127.0.0.1", 20001)
 UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
@@ -41,15 +41,15 @@ def read_raw_data(addr):
 
 def analyzeData(Queue):
     th = 4
-    run = True
+    StandBY = False
     while True:
         if not (Queue.empty()):
             obj = Queue.get()
-            if type(obj) == float or type(obj) == int:
-                th = obj
-            elif type(obj) == bool:
-                run = obj
-        if run:
+            if type(obj) == bool:
+                StandBY = obj
+            elif type(obj) == int:
+                th = int(obj)
+        if not StandBY:
             acc_x = read_raw_data(ACCEL_XOUT_H)
             acc_y = read_raw_data(ACCEL_YOUT_H)
             acc_z = read_raw_data(ACCEL_ZOUT_H)
@@ -65,38 +65,44 @@ def analyzeData(Queue):
             Gz = gyro_z / 131.0
             sleep(1)
             if Ax > th or Ay > th or Az > th or Gx > th or Gy > th or Gz > th:
+            if th > 2:
                 alert = str.encode("alert")
                 UDPClientSocket.sendto(alert, serverAddressPort)
                 try:
                     answer = UDPClientSocket.recvfrom(1024)
                     Message = answer[0].decode().split(" ")
-                    print(Message[0])
+                    if Message[0] == "sent":
+                        sleep(20)  # sleep to avoid overloading alerts until waves calm
                 except ConnectionError:     # lost connection
                     print("connection lost")
                     continue
-                except Exception as e:  # other exceptions
-                    print(e)
+                except Exception as exp:  # other exceptions
+                    print(exp)
                     continue
-                sleep(20)  # sleep to avoid overloading alerts until waves calm
         else:
             sleep(1)
 
 
-def receiveMessages():
+def getStatus():
+    msg = str.encode("status")
+    threshold = 4
+    standBy = "false"
     while True:
         try:
+            UDPClientSocket.sendto(msg, serverAddressPort)
             bytesAddressPair = UDPClientSocket.recvfrom(1024)
             splitMessage = bytesAddressPair[0].decode().split(" ")
-            command = splitMessage[0]
-            print(command)
-            if command == "threshold":
-                queue.put(splitMessage[1])
-            elif command == "standby":
-                queue.put(False)
-            elif command == "start":
-                queue.put(True)
-            else:
-                print(command)
+            if threshold != int(splitMessage[0]) or standBy != splitMessage[1]:
+                while not queue.empty():    # empty the queue
+                    queue.get()
+                threshold = int(splitMessage[0])
+                standBy = splitMessage[1]
+                queue.put(threshold)
+                if standBy == "false":
+                    queue.put(False)
+                elif standBy == "true":
+                    queue.put(True)
+            sleep(1)
         except socket.timeout:
             pass
         except Exception as exp:
@@ -107,14 +113,12 @@ def receiveMessages():
 if __name__ == '__main__':
     MPU_Init()
     queue = multiprocessing.Queue()
-    bytesToSend = str.encode("sensor")
     try:
-        UDPClientSocket.sendto(bytesToSend, serverAddressPort)
         ReadingData = multiprocessing.Process(target=analyzeData, args=(queue,))
         ReadingData.start()
-        receiveMessages()
+        getStatus()
     except WindowsError as e:
-        print(e)
+        print(str(e))
         print("no connection")
     except Exception as e:
-        print(e)
+        print(str(e))
