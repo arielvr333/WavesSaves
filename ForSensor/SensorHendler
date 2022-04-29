@@ -65,7 +65,6 @@ def analyzeData(Queue):
             Gz = gyro_z / 131.0
             sleep(1)
             if Ax > th or Ay > th or Az > th or Gx > th or Gy > th or Gz > th:
-            if th > 2:
                 alert = str.encode("alert")
                 UDPClientSocket.sendto(alert, serverAddressPort)
                 try:
