@@ -6,6 +6,7 @@ const mongoose = require('mongoose')
 const request = require('request');
 const udp = require('dgram');
 const server = udp.createSocket('udp4');
+let activeSensors = new Map();
 
 if (process.env.NODE_ENV === "development") {
     const swaggerUI = require("swagger-ui-express")
@@ -43,9 +44,6 @@ const sensorRouter = require('./routes/sensor_routes')
 app.use('/sensor',sensorRouter)
 
 const authRouter = require('./routes/auth_routes')
-// const Module = require("module");
-// const User = require("./models/user_model");
-// const Sensor = require("./models/sensor_model");
 app.use('/auth',authRouter)
 
 module.exports = app
@@ -55,15 +53,10 @@ server.on('error',function(error){
 });
 
 server.on('message',function(msg,info) {
-    // let message = msg.toString();
     const splitMessage = msg.toString().split(',');
     const command = splitMessage[0];
     console.log('command: ' + command);
     switch (command) {
-        // case 'sensor'://"sensor"
-        //     console.log('switch case sensor statement');
-        //     sensorInit(info);
-        //     break;
         case 'alert'://alert
             alertHandler(info).then(() => console.log('switch case alert data statement'))
             break
@@ -79,32 +72,11 @@ server.on('listening',function(){
     let address = server.address();
     console.log('Udp Server is listening at port ' + address.port);
     console.log('Udp Server ip :' + address.address);
-
 });
 
 server.bind(20001, "127.0.0.1");
 //server.bind(20001, "0.0.0.0");
 
-// function SendMessage(message,port,address){
-//     server.send(message,port, address);
-// }
-
-// function sensorInit(info){
-//     const sensor={
-//          _id: info.address,
-//         _users: [],
-//         _threshold: 2,
-//         _standBy: false
-//     }
-//     db.collection('sensors').findOne({_id: sensor._id},async function (err, doc) {
-//         if (!doc) {
-//             db.collection('sensors').insertOne(sensor, function () {
-//                 server.send("threshold " + sensor._threshold, info.port, info.address,sensor._standBy)
-//             });
-//         } else
-//             server.send("threshold " + doc._threshold, info.port, info.address,doc._standBy);
-//     });
-// }
 async function alertHandler(info) {
     let sensor = await db.collection('sensors').findOne({_id: info.address})
     for (let i = 0; i < sensor._users.length; i++) {
@@ -147,8 +119,40 @@ function sendStatus(info){
             });
         } else
             server.send( doc._threshold + " " + doc._standBy, info.port, info.address);
+        activeSensors.set(info.address, Date.now().toString());
     });
 }
 
+setInterval(function () {
+    for (let entry of activeSensors.entries()) {
+        if ((Date.now() - 5000) > entry[1]) {
+            let ip = entry[0]
+            activeSensors.delete(ip);
+            sendPushNotification(ip).then(() => console.log(ip + " disconnected"))
+        }
+    }
+}, 5000);
 
-// exports.SendMessage = SendMessage;
+async function sendPushNotification(ip) {
+    let sensor = await db.collection('sensors').findOne({_id: ip})
+    for (let i = 0; i < sensor._users.length; i++) {
+        db.collection('users').findOne({email: sensor._users[i]}, function (err, doc) {
+            const payload = createPushPayLoad(doc.firebaseToken, ip);
+            request.post({
+                headers: {'content-type': 'application/json', "Authorization": process.env.FIREBASE_TOKEN},
+                url: "https://fcm.googleapis.com/fcm/send",
+                body: payload
+            });
+        });
+    }
+}
+function createPushPayLoad(token, ip){
+    let payload = {
+        to: token,
+        notification: {
+            title: 'חיישן נותק!',
+            body: 'חיישן ' + ip + ' התנתק מהרשת'
+        }
+    }
+    return JSON.stringify(payload)
+}

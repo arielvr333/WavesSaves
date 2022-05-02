@@ -59,9 +59,7 @@ const login = async (req, res) => {
 
         const accessToken = await jwt.sign(
             {'id':user._id},
-            process.env.ACCESS_TOKEN_SECRET,
-            {expiresIn: process.env.JWT_TOKEN_EXPIRATION}
-            )
+            process.env.ACCESS_TOKEN_SECRET)
         await User.updateOne({'email' : email},{$set:{  firebaseToken: token}});
         res.status(200).send({'accessToken' : accessToken})
 
@@ -72,10 +70,15 @@ const login = async (req, res) => {
 }
 
 const logout = async (req, res) => {
-    res.status(400).send({
-        'status': 'fail',
-        'error': 'not implemented'
-    })
+    try{
+
+    }
+    catch (err) {
+        res.status(400).send({
+            'status': 'fail',
+            'error': 'not implemented'
+        })
+    }
 }
 
 module.exports = {

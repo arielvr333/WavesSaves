@@ -51,7 +51,7 @@ const setStandByMode =  (req, res) => {
 
 const getSensorById = async (req, res) => {
     try {
-        sensors = await Sensor.findById(req.params.id)
+        let sensors = await Sensor.findById(req.params.id)
         res.status(200).send(sensors)
     } catch (err) {
         res.status(400).send({
@@ -65,6 +65,7 @@ const attachSensor = async (req, res) => {
     try {
         let userName = req.body.email
         let sensorIp = req.body.sensor
+
         User.findOne({email: userName}, async function (err, doc) {
             if(!doc.sensorList.includes(sensorIp)) {
                 doc.sensorList.push(sensorIp);
@@ -99,10 +100,26 @@ const attachSensor = async (req, res) => {
     }
 }
 
+const removeSensor = async (req, res) => {
+    try {
+        let userName = req.body.email
+        let sensorIp = req.body.sensor
+        await User.updateOne({email: userName}, {$pull: { sensorList: sensorIp }});
+        await Sensor.updateOne({_id: sensorIp}, {$pull: { _users: userName }});
+        res.status(200).send("ok")
+    } catch (err) {
+        res.status(400).send({
+            'status': 'fail',
+            'error': err.message
+        })
+    }
+}
+
 module.exports = {
     getSensors,
     getSensorById,
     attachSensor,
     updateThreshold,
-    setStandByMode
+    setStandByMode,
+    removeSensor
 }

@@ -95,10 +95,12 @@ router.get('/:id', authenticate, Sensor.getSensorById)
 *               $ref: '#/components/schemas/Post'
 */
 
-router.post('/threshold', Sensor.updateThreshold)  //authenticate
+router.post('/threshold', authenticate, Sensor.updateThreshold)
 
-router.post('/standby', Sensor.setStandByMode)  //authenticate
+router.post('/standby', authenticate, Sensor.setStandByMode)
 
-router.post('/add', Sensor.attachSensor)
+router.post('/add', authenticate, Sensor.attachSensor)
+
+router.post('/removeSensor', authenticate, Sensor.removeSensor)
 
 module.exports = router

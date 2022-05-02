@@ -1,22 +1,14 @@
-#   //"to": "esF2EDkpSb6jMnXMrr8tRq:APA91bHtvG1D8tFAwpzLQ72mt0aDiNKWmw9eL2ITLCSMuE4trTs4oJoHIOqMEbANhrcYoLehi1J2bq58stHAxNl0Q3ayAortZMfEHFYdPSJ_YYqsF5tbN37aOQlfF4nq0qYqYgXj0TW1",
-
-###
-
-
-GET http://localhost:28017/
-
-
+#   //"to": "esF2EDkpSb6jMnXMrr8tRq:APA91bHtvG1D8tFAwpzLQ72mt0aDiNKWmw9eL2ITLCSMuE4trTs4oJoHIOqMEbANhrcYoLehi1J2bq58stHAxNl0Q3ayAortZMfEHFYdPSJ_YYqsF5tbN37aOQlfF4nq0qYqYgXj0TW1"
 ###
 
 
 GET http://localhost:28017/sensor
-//Authorization: barer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyMGQ0YmFhZGNmZjM0ODMyZmZmMzBhNiIsImlhdCI6MTY0NTA0MDUxNSwiZXhwIjoxNjQ1MDQwNTQ1fQ.MxJ76Q6D3tiFP7i6pe1zEogk_cnvsRYcxXBHwsmA_rQ
 ###
 
 
 POST http://localhost:80/sensor/add
 Content-Type: application/json
-//Authorization : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyNmI2ZTM2YjdjN2IyZDg3YzE0NTJiMiIsImlhdCI6MTY1MTI2MTQ1NCwiZXhwIjoxNjUxMjY1MDU0fQ.sui0GM3oefWW5yyMj8ANCwT0SMY67I3M56_CsJqPBAA
+Authorization: barer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyNmI2ZTM2YjdjN2IyZDg3YzE0NTJiMiIsImlhdCI6MTY1MTUxNjQ2MH0.3pFRNobR09lOJXy-Ghm7Ln2tte_xE-EnWqieD-tOCoU
 
 {
   "email" : "tomer@gmail.com",
@@ -25,10 +17,21 @@ Content-Type: application/json
 
 ###
 
-//Authorization: barer 021a7220b3deea31d0094bfec4e33ab6e6e8f09417e253fded8409960a37e4a68988765beded4d4892ac9c256bf4fa26b886cd2b83746404956205274724071c
+POST http://localhost:80/sensor/removeSensor
+Content-Type: application/json
+Authorization: barer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyNmI2ZTM2YjdjN2IyZDg3YzE0NTJiMiIsImlhdCI6MTY1MTUxNjQ2MH0.3pFRNobR09lOJXy-Ghm7Ln2tte_xE-EnWqieD-tOCoU
+
+{
+  "email" : "tomer@gmail.com",
+  "sensor" : "127.0.0.1"
+}
+
+###
+
 
 POST http://localhost:80/sensor/getall
 Content-Type: application/json
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyNmI2ZTM2YjdjN2IyZDg3YzE0NTJiMiIsImlhdCI6MTY1MTUxNjQ2MH0.3pFRNobR09lOJXy-Ghm7Ln2tte_xE-EnWqieD-tOCoU
 
 {
     "email" : "tomer@gmail.com"
@@ -38,16 +41,18 @@ Content-Type: application/json
 ###
 POST http://localhost:80/sensor/threshold
 Content-Type: application/json
+Authorization: barer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyNmI2ZTM2YjdjN2IyZDg3YzE0NTJiMiIsImlhdCI6MTY1MTUxNjQ2MH0.3pFRNobR09lOJXy-Ghm7Ln2tte_xE-EnWqieD-tOCoU
 
 {
   "ip" : "127.0.0.1",
-  "threshold": 4
+  "threshold": 3
 
 }
 
 ###
 POST http://localhost:80/sensor/standby
 Content-Type: application/json
+Authorization: barer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyNmI2ZTM2YjdjN2IyZDg3YzE0NTJiMiIsImlhdCI6MTY1MTUxNjQ2MH0.3pFRNobR09lOJXy-Ghm7Ln2tte_xE-EnWqieD-tOCoU
 
 {
   "ip" : "127.0.0.1",
