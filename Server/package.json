@@ -1,14 +1,14 @@
 {
-  "name": "node_demo",
+  "name": "wavessaves",
   "version": "1.0.0",
-  "description": "Node demo",
+  "description": "wavessaves",
   "main": "app.js",
   "scripts": {
     "test": "jest --detectOpenHandles --forceExit",
     "devstart": "nodemon app.js",
     "start": "node app.js"
   },
-  "author": "Menachi",
+  "author": "Tomer & Ariel",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.0.1",

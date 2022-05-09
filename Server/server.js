@@ -15,9 +15,21 @@ if (process.env.NODE_ENV === "development") {
         definition: {
             openapi: "3.0.0",
             info: {
-                title: "Node Demo API",
+                title: "WavesSaves API",
                 version: "1.0.0",
-                description: "A simple Express Library API",
+                description: "WavesSaves API",
+            },
+            components: {
+                securitySchemes: {
+                    Authorization: {
+                        type: 'apiKey',
+                        in: 'header',
+                        name: 'Authorization'
+                    }
+                }
+            },
+            security: {
+                Authorization: []
             },
             servers: [{url: "http://localhost:" + process.env.PORT,},],
         },
@@ -25,7 +37,7 @@ if (process.env.NODE_ENV === "development") {
     };
     const specs = swaggerJsDoc(options);
     app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(specs));
- }
+}
 
 app.use(bodyParser.urlencoded({extended:true, limit: '1m'}))
 app.use(bodyParser.json())

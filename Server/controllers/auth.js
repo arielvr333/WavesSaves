@@ -60,7 +60,7 @@ const login = async (req, res) => {
         const accessToken = await jwt.sign(
             {'id':user._id},
             process.env.ACCESS_TOKEN_SECRET)
-        await User.updateOne({'email' : email},{$set:{  firebaseToken: token}});
+        await User.updateOne({'email' : email},{$set:{firebaseToken: token}});
         res.status(200).send({'accessToken' : accessToken})
 
     }catch(err){
@@ -70,13 +70,16 @@ const login = async (req, res) => {
 }
 
 const logout = async (req, res) => {
-    try{
-
+    const username = req.body.email;
+    try {
+        User.updateOne({"email": username}, {$set: {firebaseToken: ""}}, function () {
+            res.status(200).send("ok")
+        });
     }
     catch (err) {
         res.status(400).send({
             'status': 'fail',
-            'error': 'not implemented'
+            'error': 'error: ' + err
         })
     }
 }

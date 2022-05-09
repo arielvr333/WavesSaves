@@ -49,18 +49,6 @@ const setStandByMode =  (req, res) => {
     }
 }
 
-const getSensorById = async (req, res) => {
-    try {
-        let sensors = await Sensor.findById(req.params.id)
-        res.status(200).send(sensors)
-    } catch (err) {
-        res.status(400).send({
-            'status': 'fail',
-            'error': err.message
-        })
-    }
-}
-
 const attachSensor = async (req, res) => {
     try {
         let userName = req.body.email
@@ -117,7 +105,6 @@ const removeSensor = async (req, res) => {
 
 module.exports = {
     getSensors,
-    getSensorById,
     attachSensor,
     updateThreshold,
     setStandByMode,
