@@ -1,21 +1,21 @@
 const app = require('../server')
 const request = require('supertest')
 const mongoosse = require('mongoose')
-const { response } = require('../server')
 const User = require('../models/user_model')
 
-const email = 'test@a.com'
+const email = 'aaa@gmail.com'
 const pwd = '123456'
 
 beforeAll(done=>{
-    User.remove({'email' : email}, (err)=>{
+    User.deleteOne({'email' : email}, ()=>{
         done()
     })
 })
 
 afterAll(done=>{
-    User.remove({'email' : email}, (err)=>{
+    User.deleteOne({'email' : email}, ()=>{
         mongoosse.connection.close()
+        app.server.close()
         done()
     })
 })
@@ -26,7 +26,8 @@ describe('Testing Auth API',()=>{
     test('test registration',async ()=>{
         const response = await request(app).post('/auth/register').send({
             'email' : email,
-            'password':pwd
+            'password':pwd,
+            'firebaseToken': 'asdfghjhgfdsdfgh'
         })
         expect(response.statusCode).toEqual(200)
     })
@@ -34,9 +35,9 @@ describe('Testing Auth API',()=>{
     test('test login',async ()=>{
         const response = await request(app).post('/auth/login').send({
             'email' : email,
-            'password':pwd
+            'password':pwd,
+            'firebaseToken': 'fbvzkjdkhbsfmdvfsbdgnfhgdbfs#$%#^HGDFSDZVDBG'
         })
         expect(response.statusCode).toEqual(200)
     })
-   
 })

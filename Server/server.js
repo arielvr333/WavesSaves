@@ -67,10 +67,9 @@ server.on('error',function(error){
 server.on('message',function(msg,info) {
     const splitMessage = msg.toString().split(',');
     const command = splitMessage[0];
-    console.log('command: ' + command);
     switch (command) {
         case 'alert'://alert
-            alertHandler(info).then(() => console.log('switch case alert data statement'))
+            alertHandler(info).then(() => console.log('alert sent'))
             break
         case 'status':
             sendStatus(info);

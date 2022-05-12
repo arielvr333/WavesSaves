@@ -22,7 +22,7 @@ const updateThreshold =  (req, res) => {
     const _ip = req.body.ip;
     const threshold = req.body.threshold;
     try {
-        Sensor.updateOne({"_id": _ip}, {$set: {_threshold: threshold}}, function (err, doc) {
+        Sensor.updateOne({"_id": _ip}, {$set: {_threshold: threshold}}, function () {
             res.status(200).send("ok")
         });
     }catch (err) {
@@ -38,7 +38,6 @@ const setStandByMode =  (req, res) => {
     const StandBy = req.body.standBy;
     try {
         Sensor.updateOne({"_id": sensorIp}, {$set: {_standBy: StandBy}}, function () {
-            console.log("threshold")
             res.status(200).send("ok")
         });
     }catch (err) {
