@@ -44,8 +44,8 @@ app.use(bodyParser.json())
 
 mongoose.connect(process.env.DATABASE_URL,{useNewUrlParser : true})
 const db = mongoose.connection
-db.on('error',error=>{console.error(error)})
-db.once('open',()=>{console.log('db connected!')})
+db.on('error',error=> console.error(error))
+db.once('open',()=> console.log('db connected!'))
 
 const port = process.env.PORT
 
@@ -60,36 +60,29 @@ app.use('/auth',authRouter)
 
 module.exports = app
 
-server.on('error',function(error){
-    console.log('Error: ' + error);
-});
+server.on('error',(error)=> console.log('Error: ' + error));
 
 server.on('message',function(msg,info) {
     const splitMessage = msg.toString().split(',');
     const command = splitMessage[0];
     switch (command) {
         case 'alert'://alert
-            alertHandler(info).then(() => console.log('alert sent'))
+            alertHandler(info, splitMessage[1]).then(() => console.log('alert sent'))
             break
         case 'status':
-            sendStatus(info);
+            sendStatus(info, splitMessage[1]);
             break
         default:
             console.log('default statement');
     }
 });
 
-server.on('listening',function(){
-    let address = server.address();
-    console.log('Udp Server is listening at port ' + address.port);
-    console.log('Udp Server ip :' + address.address);
-});
+server.on('listening',() => console.log('Udp Server is listening at port ' + server.address().port));
 
-server.bind(20001, "127.0.0.1");
-//server.bind(20001, "0.0.0.0");
+server.bind(20001, "0.0.0.0");
 
-async function alertHandler(info) {
-    let sensor = await db.collection('sensors').findOne({_id: info.address})
+async function alertHandler(info, Id) {
+    let sensor = await db.collection('sensors').findOne({_id: Id})
     for (let i = 0; i < sensor._users.length; i++) {
         db.collection('users').findOne({email: sensor._users[i]}, function (err, doc) {
             const payload = createPayLoad(doc.firebaseToken);
@@ -116,13 +109,13 @@ function createPayLoad(token){
     return JSON.stringify(payload)
 }
 
-function sendStatus(info){
-    db.collection('sensors').findOne({_id: info.address},async function (err, doc) {
+function sendStatus(info, Id){
+    db.collection('sensors').findOne({_id: Id},async function (err, doc) {
         if (!doc) {
             let sensor={
-                _id: info.address,
+                _id: Id,
                 _users: [],
-                _threshold: 2,
+                _threshold: 5,
                 _standBy: false
             }
             db.collection('sensors').insertOne(sensor, function () {
@@ -130,25 +123,25 @@ function sendStatus(info){
             });
         } else
             server.send( doc._threshold + " " + doc._standBy, info.port, info.address);
-        activeSensors.set(info.address, Date.now().toString());
+        activeSensors.set(Id, Date.now().toString());
     });
 }
 
 setInterval(function () {
     for (let entry of activeSensors.entries()) {
         if ((Date.now() - 5000) > entry[1]) {
-            let ip = entry[0]
-            activeSensors.delete(ip);
-            sendPushNotification(ip).then(() => console.log(ip + " disconnected"))
+            let Id = entry[0]
+            activeSensors.delete(Id);
+            sendPushNotification(Id).then(() => console.log(Id + " disconnected"))
         }
     }
 }, 5000);
 
-async function sendPushNotification(ip) {
-    let sensor = await db.collection('sensors').findOne({_id: ip})
+async function sendPushNotification(Id) {
+    let sensor = await db.collection('sensors').findOne({_id: Id})
     for (let i = 0; i < sensor._users.length; i++) {
         db.collection('users').findOne({email: sensor._users[i]}, function (err, doc) {
-            const payload = createPushPayLoad(doc.firebaseToken, ip);
+            const payload = createPushPayLoad(doc.firebaseToken, Id);
             request.post({
                 headers: {'content-type': 'application/json', "Authorization": process.env.FIREBASE_TOKEN},
                 url: "https://fcm.googleapis.com/fcm/send",

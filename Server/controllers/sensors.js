@@ -3,8 +3,8 @@ const User = require('../models/user_model')
 
 
 const getSensors = async (req, res) => {
-    const _email = req.body.email;
     try {
+        const _email = req.body.email;
         let specificUser = await User.findOne({email: _email});
         Sensor.find({_id: {$in: specificUser.sensorList}}, function (err, doc) {
             doc = doc.map(u => ({_id: u._id, _threshold: u._threshold, _standBy: u._standBy}));
@@ -19,9 +19,9 @@ const getSensors = async (req, res) => {
 }
 
 const updateThreshold =  (req, res) => {
+    try {
     const _ip = req.body.ip;
     const threshold = req.body.threshold;
-    try {
         Sensor.updateOne({"_id": _ip}, {$set: {_threshold: threshold}}, function () {
             res.status(200).send("ok")
         });
@@ -34,13 +34,13 @@ const updateThreshold =  (req, res) => {
 }
 
 const setStandByMode =  (req, res) => {
-    const sensorIp = req.body.ip;
-    const StandBy = req.body.standBy;
     try {
-        Sensor.updateOne({"_id": sensorIp}, {$set: {_standBy: StandBy}}, function () {
+        const sensorId = req.body.ip;
+        const StandBy = req.body.standBy;
+        Sensor.updateOne({"_id": sensorId}, {$set: {_standBy: StandBy}}, function () {
             res.status(200).send("ok")
         });
-    }catch (err) {
+    } catch (err) {
         res.status(400).send({
             'status': 'fail',
             'error': err.message
@@ -51,21 +51,21 @@ const setStandByMode =  (req, res) => {
 const attachSensor = async (req, res) => {
     try {
         let userName = req.body.email
-        let sensorIp = req.body.sensor
+        let sensorId = req.body.sensor
 
         User.findOne({email: userName}, async function (err, doc) {
-            if(!doc.sensorList.includes(sensorIp)) {
-                doc.sensorList.push(sensorIp);
+            if(!doc.sensorList.includes(sensorId) || (doc.sensorList.length === 0)) {
+                doc.sensorList.push(sensorId);
                 await doc.save();
             }
         });
 
-        Sensor.findOne({_id: sensorIp}, async function (err, doc) {
+        Sensor.findOne({_id: sensorId}, async function (err, doc) {
             if (!doc) {
                 let newSensor = {
-                    _id: sensorIp,
+                    _id: sensorId,
                     _users: [userName],
-                    _threshold: 2,
+                    _threshold: 5,
                     _standBy: false
                 }
                 Sensor.create(newSensor, function () {
@@ -90,9 +90,9 @@ const attachSensor = async (req, res) => {
 const removeSensor = async (req, res) => {
     try {
         let userName = req.body.email
-        let sensorIp = req.body.sensor
-        await User.updateOne({email: userName}, {$pull: { sensorList: sensorIp }});
-        await Sensor.updateOne({_id: sensorIp}, {$pull: { _users: userName }});
+        let sensorId = req.body.sensor
+        await User.updateOne({email: userName}, {$pull: {sensorList: sensorId}});
+        await Sensor.updateOne({_id: sensorId}, {$pull: {_users: userName}});
         res.status(200).send("ok")
     } catch (err) {
         res.status(400).send({

@@ -74,7 +74,7 @@ POST http://193.106.55.120:80/auth/register
 Content-Type: application/json
 
 {
-    "email" : "tomer@gmail.com",
+    "email" : "ariel@gmail.com",
     "password" : "123456",
     "firebaseToken": "esF2EDkpSb6jMnXMrr8tRq:APA91bHtvG1D8tFAwpzLQ72mt0aDiNKWmw9eL2ITLCSMuE4trTs4oJoHIOqMEbANhrcYoLehi1J2bq58stHAxNl0Q3ayAortZMfEHFYdPSJ_YYqsF5tbN37aOQlfF4nq0qYqYgXj0TW1"
 }
