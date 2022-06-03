@@ -13,6 +13,10 @@ const sensorSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    _name: {
+        type: String,
+        required: true
+    },
     _standBy: {
         type: Boolean,
         required: true

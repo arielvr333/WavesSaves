@@ -7,7 +7,8 @@ const getSensors = async (req, res) => {
         const _email = req.body.email;
         let specificUser = await User.findOne({email: _email});
         Sensor.find({_id: {$in: specificUser.sensorList}}, function (err, doc) {
-            doc = doc.map(u => ({_id: u._id, _threshold: u._threshold, _standBy: u._standBy}));
+            doc = doc.map(u => ({_id: u._id, _threshold: u._threshold, _name: u._name, _standBy: u._standBy}));
+            console.log(doc.map(u => ({ _name: u._name})))
             res.status(200).send(doc)
         });
     }catch (err) {
@@ -66,6 +67,7 @@ const attachSensor = async (req, res) => {
                     _id: sensorId,
                     _users: [userName],
                     _threshold: 5,
+                    _name: "WavesSaves bouy",
                     _standBy: false
                 }
                 Sensor.create(newSensor, function () {
@@ -102,10 +104,24 @@ const removeSensor = async (req, res) => {
     }
 }
 
+const setSensorName =  (req, res) => {
+    try {
+        const sensorId = req.body.id;
+        const name = req.body.name;
+        Sensor.updateOne({"_id": sensorId}, {$set: {"_name": name}},  ()=> res.status(200).send("ok"));
+    } catch (err) {
+        res.status(400).send({
+            'status': 'fail',
+            'error': err.message
+        })
+    }
+}
+
 module.exports = {
     getSensors,
     attachSensor,
     updateThreshold,
     setStandByMode,
-    removeSensor
+    removeSensor,
+    setSensorName
 }

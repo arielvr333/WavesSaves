@@ -116,6 +116,7 @@ function sendStatus(info, Id){
                 _id: Id,
                 _users: [],
                 _threshold: 5,
+                _name: "WavesSaves bouy",
                 _standBy: false
             }
             db.collection('sensors').insertOne(sensor, function () {

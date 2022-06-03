@@ -198,4 +198,6 @@ router.post('/add', authenticate, Sensor.attachSensor)
 
 router.post('/removeSensor', authenticate, Sensor.removeSensor)
 
+router.post('/nameSensor', authenticate, Sensor.setSensorName)
+
 module.exports = router
