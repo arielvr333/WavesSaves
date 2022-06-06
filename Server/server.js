@@ -7,6 +7,7 @@ const request = require('request');
 const udp = require('dgram');
 const server = udp.createSocket('udp4');
 let activeSensors = new Map();
+let alertedUsers = []
 
 if (process.env.NODE_ENV === "development") {
     const swaggerUI = require("swagger-ui-express")
@@ -85,12 +86,15 @@ async function alertHandler(info, Id) {
     let sensor = await db.collection('sensors').findOne({_id: Id})
     for (let i = 0; i < sensor._users.length; i++) {
         db.collection('users').findOne({email: sensor._users[i]}, function (err, doc) {
-            const payload = createPayLoad(doc.firebaseToken);
-            request.post({
-                headers: {'content-type': 'application/json', "Authorization": process.env.FIREBASE_TOKEN},
-                url: "https://fcm.googleapis.com/fcm/send",
-                body: payload
-            });
+            if(!doc._id in alertedUsers) {
+                const payload = createPayLoad(doc.firebaseToken);
+                request.post({
+                    headers: {'content-type': 'application/json', "Authorization": process.env.FIREBASE_TOKEN},
+                    url: "https://fcm.googleapis.com/fcm/send",
+                    body: payload
+                });
+                alertedUsers.push(doc._id)
+            }
         });
         server.send("sent", info.port, info.address)
     }
@@ -129,6 +133,9 @@ function sendStatus(info, Id){
 }
 
 setInterval(function () {
+    for (const i in alertedUsers){
+        alertedUsers.pop()
+    }
     for (let entry of activeSensors.entries()) {
         if ((Date.now() - 5000) > entry[1]) {
             let Id = entry[0]
@@ -142,7 +149,7 @@ async function sendPushNotification(Id) {
     let sensor = await db.collection('sensors').findOne({_id: Id})
     for (let i = 0; i < sensor._users.length; i++) {
         db.collection('users').findOne({email: sensor._users[i]}, function (err, doc) {
-            const payload = createPushPayLoad(doc.firebaseToken, Id);
+            const payload = createPushPayLoad(doc.firebaseToken, sensor._name);
             request.post({
                 headers: {'content-type': 'application/json', "Authorization": process.env.FIREBASE_TOKEN},
                 url: "https://fcm.googleapis.com/fcm/send",
@@ -151,12 +158,12 @@ async function sendPushNotification(Id) {
         });
     }
 }
-function createPushPayLoad(token, ip){
+function createPushPayLoad(token, name){
     let payload = {
         to: token,
         notification: {
             title: 'חיישן נותק!',
-            body: 'חיישן ' + ip + ' התנתק מהרשת'
+            body: 'Sensor ' + name + ' disconnected from the server'
         }
     }
     return JSON.stringify(payload)

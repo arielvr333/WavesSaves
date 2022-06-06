@@ -53,7 +53,7 @@ const attachSensor = async (req, res) => {
     try {
         let userName = req.body.email
         let sensorId = req.body.sensor
-
+        let name = req.body.name
         User.findOne({email: userName}, async function (err, doc) {
             if(!doc.sensorList.includes(sensorId) || (doc.sensorList.length === 0)) {
                 doc.sensorList.push(sensorId);
@@ -67,7 +67,7 @@ const attachSensor = async (req, res) => {
                     _id: sensorId,
                     _users: [userName],
                     _threshold: 5,
-                    _name: "WavesSaves bouy",
+                    _name: name,
                     _standBy: false
                 }
                 Sensor.create(newSensor, function () {
@@ -75,6 +75,7 @@ const attachSensor = async (req, res) => {
                 });
             } else {
                 if(!doc._users.includes(userName)) {
+                    doc._name = name
                     doc._users.push(userName);
                     await doc.save();
                 }

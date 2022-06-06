@@ -5,7 +5,8 @@ Authorization: barer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyNmI2ZTM2Yj
 
 {
   "email" : "tomer@gmail.com",
-  "sensor" : "1000000"
+  "sensor" : "1000001",
+  "name": "Sensor"
 }
 
 ###
@@ -22,7 +23,7 @@ Authorization: barer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyNmI2ZTM2Yj
 ###
 
 
-POST http://localhost:80/sensor/getall
+POST http://193.106.55.120:80/sensor/getall
 Content-Type: application/json
 Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyNmI2ZTM2YjdjN2IyZDg3YzE0NTJiMiIsImlhdCI6MTY1MTUxNjQ2MH0.3pFRNobR09lOJXy-Ghm7Ln2tte_xE-EnWqieD-tOCoU
 
@@ -101,7 +102,7 @@ Content-Type: application/json
 ###
 
 
-POST http://localhost:80/auth/login
+POST http://193.106.55.120:80/auth/login
 Content-Type: application/json
 
 {
