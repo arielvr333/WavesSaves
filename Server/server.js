@@ -68,10 +68,10 @@ server.on('message',function(msg,info) {
     const command = splitMessage[0];
     switch (command) {
         case 'alert'://alert
-            alertHandler(info, splitMessage[1]).then(() => console.log('alert sent'))
+            alertHandler(info, splitMessage[1]).then(() => console.log('alert sent ' + splitMessage[1]))
             break
         case 'status':
-            sendStatus(info, splitMessage[1]);
+            sendStatus(info,splitMessage[1]);
             break
         default:
             console.log('default statement');
@@ -86,15 +86,21 @@ async function alertHandler(info, Id) {
     let sensor = await db.collection('sensors').findOne({_id: Id})
     for (let i = 0; i < sensor._users.length; i++) {
         db.collection('users').findOne({email: sensor._users[i]}, function (err, doc) {
-            if(!doc._id in alertedUsers) {
-                const payload = createPayLoad(doc.firebaseToken);
-                request.post({
-                    headers: {'content-type': 'application/json', "Authorization": process.env.FIREBASE_TOKEN},
-                    url: "https://fcm.googleapis.com/fcm/send",
-                    body: payload
-                });
-                alertedUsers.push(doc._id)
-            }
+            console.log(alertedUsers);
+            console.log(doc.email);
+            result =alertedUsers.filter(element => element.includes(doc.email));
+            console.log(result);
+            if(typeof result !== 'undefined' && result.length === 0){
+            const payload = createPayLoad(doc.firebaseToken);
+            console.log("i am here");
+            request.post({
+                headers: {'content-type': 'application/json', "Authorization": process.env.FIREBASE_TOKEN},
+                url: "https://fcm.googleapis.com/fcm/send",
+                body: payload
+            });
+            alertedUsers.push(doc.email)
+            console.log(alertedUsers);
+        }
         });
         server.send("sent", info.port, info.address)
     }
@@ -133,7 +139,7 @@ function sendStatus(info, Id){
 }
 
 setInterval(function () {
-    for (const i in alertedUsers){
+    for(const i in alertedUsers){
         alertedUsers.pop()
     }
     for (let entry of activeSensors.entries()) {
@@ -162,8 +168,8 @@ function createPushPayLoad(token, name){
     let payload = {
         to: token,
         notification: {
-            title: 'חיישן נותק!',
-            body: 'Sensor ' + name + ' disconnected from the server'
+            title: 'sensor disconnected!',
+            body: 'sensor ' + name + ' disconnected from the server'
         }
     }
     return JSON.stringify(payload)
