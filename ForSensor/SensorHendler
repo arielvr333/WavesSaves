@@ -3,6 +3,7 @@ import socket
 from time import sleep
 import multiprocessing
 
+ID = "1000003"
 PWR_MGMT_1 = 0x6B
 SMPLRT_DIV = 0x19
 CONFIG = 0x1A
@@ -41,7 +42,7 @@ def read_raw_data(addr):
 
 def analyzeData(Queue):
     th = 5
-    basic= 5 + th
+    basic= 1 + th
     StandBY = False
     while True:
         if not (Queue.empty()):
@@ -50,7 +51,7 @@ def analyzeData(Queue):
                 StandBY = obj
             elif type(obj) == int:
                 th = int(obj)
-                basic = 5 + th
+                basic = 1 + th
         if not StandBY:
             acc_x = read_raw_data(ACCEL_XOUT_H)
             acc_y = read_raw_data(ACCEL_YOUT_H)
@@ -67,7 +68,7 @@ def analyzeData(Queue):
             Gz = gyro_z / 131.0
             sleep(0.5)
             if Gx > 5 + basic or Gy > 5 + basic or Az > 10 + basic * 0.25 or Az < 10 - basic * 0.25:
-                alert = str.encode("alert")
+                alert = str.encode("alert," + ID)
                 UDPClientSocket.sendto(alert, serverAddressPort)
                 try:
                     answer = UDPClientSocket.recvfrom(1024)
@@ -85,7 +86,7 @@ def analyzeData(Queue):
 
 
 def getStatus():
-    msg = str.encode("status")
+    msg = str.encode("status," + ID)
     threshold = 4
     standBy = "false"
     while True:
